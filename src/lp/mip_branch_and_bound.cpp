@@ -16,9 +16,6 @@ struct Best {
     LPSolution sol{};
 };
 
-bool is_integral(double v, double tol) {
-    return std::abs(v - std::round(v)) <= tol;
-}
 
 std::optional<std::size_t> find_fractional_var(const std::vector<double>& x,
                                                const std::vector<std::size_t>& integer_vars,
