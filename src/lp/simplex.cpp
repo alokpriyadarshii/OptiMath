@@ -87,8 +87,7 @@ struct IterationOutcome {
 IterationOutcome simplex_iterations(
     Tableau& T,
     const core::SolverOptions& options,
-    const std::vector<bool>& allowed_enter,
-    bool verbose_prefix = false) {
+    const std::vector<bool>& allowed_enter) {
 
     const std::size_t m = T.basis.size();
     const std::size_t nvars = T.a[0].size() - 1;
