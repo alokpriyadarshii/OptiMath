@@ -40,7 +40,7 @@ core::SolveResult<BFGSResult> minimize_bfgs(
     optimath::linalg::Vector x = x0;
 
     auto eval_grad = [&](const optimath::linalg::Vector& xx) {
-        auto gopt = f.gradient(xxyy);
+        auto gopt = f.gradient(xx);
         if (gopt) return *gopt;
         return finite_difference_gradient(f, xx);
     };
