@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="OptiMath browser playground for LP, knapsack, and nonlinear optimization demos." />
+  <title>OptiMath Web Playground</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">C++20 optimization toolkit + browser playground</p>
+        <h1>OptiMath</h1>
+        <p class="hero-text">
+          Enter optimization problems, solve them directly in the browser, and inspect clean output without installing anything.
+        </p>
+        <div class="hero-actions">
+          <a class="button primary" href="#playground">Open Playground</a>
+          <a class="button ghost" href="https://github.com/alokpriyadarshii/OptiMath" target="_blank" rel="noreferrer">View GitHub</a>
+        </div>
+      </div>
+      <div class="hero-card" aria-label="Project capabilities">
+        <span>LP</span>
+        <span>MIP</span>
+        <span>NLP</span>
+        <span>BFGS</span>
+      </div>
+    </section>
+
+    <section class="panel" id="playground">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Interactive solver</p>
+          <h2>Input problem → get output</h2>
+        </div>
+        <label class="select-wrap">
+          <span>Solver</span>
+          <select id="solverSelect">
+            <option value="lp">Linear Programming</option>
+            <option value="knapsack">0/1 Knapsack</option>
+            <option value="rosenbrock">Rosenbrock BFGS</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="grid">
+        <form class="card form-card" id="solverForm">
+          <div id="lpForm" class="solver-form active">
+            <div class="row two">
+              <label>
+                Objective mode
+                <select id="lpMode">
+                  <option value="max">Maximize</option>
+                  <option value="min">Minimize</option>
+                </select>
+              </label>
+              <label>
+                Variable names
+                <input id="lpNames" value="x, y" placeholder="x, y, z" />
+              </label>
+            </div>
+
+            <label>
+              Objective coefficients
+              <input id="lpObjective" value="3, 2" placeholder="3, 2" />
+            </label>
+
+            <label>
+              Constraints, one per line
+              <textarea id="lpConstraints" rows="7" spellcheck="false">1, 1 <= 4
+1, 0 <= 2
+0, 1 <= 3</textarea>
+            </label>
+
+            <div class="hint">
+              Format: coefficients, then relation, then RHS. Example: <code>1, 1 &lt;= 4</code>. Variables are assumed non-negative.
+            </div>
+
+            <div class="button-row">
+              <button class="button primary" type="submit">Solve LP</button>
+              <button class="button ghost" type="button" data-example="diet">Load diet example</button>
+              <button class="button ghost" type="button" data-example="transport">Load transport example</button>
+            </div>
+          </div>
+
+          <div id="knapsackForm" class="solver-form">
+            <label>
+              Item values
+              <input id="ksValues" value="6, 10, 12, 7" placeholder="6, 10, 12, 7" />
+            </label>
+            <label>
+              Item weights
+              <input id="ksWeights" value="2, 4, 6, 3" placeholder="2, 4, 6, 3" />
+            </label>
+            <label>
+              Capacity
+              <input id="ksCapacity" type="number" min="0" step="any" value="9" />
+            </label>
+            <div class="hint">Solves the 0/1 knapsack by exhaustive search for small inputs.</div>
+            <button class="button primary" type="submit">Solve Knapsack</button>
+          </div>
+
+          <div id="rosenbrockForm" class="solver-form">
+            <div class="row two">
+              <label>
+                Start x
+                <input id="rbX" type="number" step="any" value="-1.2" />
+              </label>
+              <label>
+                Start y
+                <input id="rbY" type="number" step="any" value="1" />
+              </label>
+            </div>
+            <div class="row two">
+              <label>
+                Max iterations
+                <input id="rbIterations" type="number" min="1" step="1" value="5000" />
+              </label>
+              <label>
+                Tolerance
+                <input id="rbTolerance" type="number" min="0" step="any" value="1e-8" />
+              </label>
+            </div>
+            <div class="hint">Minimizes <code>(1 - x)^2 + 100(y - x^2)^2</code> with a small JavaScript BFGS implementation.</div>
+            <button class="button primary" type="submit">Run BFGS</button>
+          </div>
+        </form>
+
+        <aside class="card output-card">
+          <div class="output-header">
+            <div>
+              <p class="eyebrow">Result</p>
+              <h3 id="outputTitle">Ready</h3>
+            </div>
+            <button class="copy-button" id="copyOutput" type="button">Copy</button>
+          </div>
+          <pre id="output">Choose a solver, edit the input, and click solve.</pre>
+        </aside>
+      </div>
+    </section>
+
+    <section class="feature-grid">
+      <article>
+        <h3>Linear Programming</h3>
+        <p>Solve small LP problems from form input and view objective value, variable values, and active constraints.</p>
+      </article>
+      <article>
+        <h3>Integer Optimization</h3>
+        <p>Try 0/1 knapsack interactively with values, weights, and capacity.</p>
+      </article>
+      <article>
+        <h3>Nonlinear Optimization</h3>
+        <p>Run Rosenbrock minimization and see the final point, objective, and iterations.</p>
+      </article>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
