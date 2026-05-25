@@ -116,6 +116,15 @@ optimath::core::SolveResult<MIPResult> solve_branch_and_bound(const MIPModel& mi
     Best best;
     SearchState state;
 
+    for (const std::size_t idx : mip.integer_vars) {
+        if (idx >= mip.relaxation.num_vars()) {
+            optimath::core::SolveResult<MIPResult> res;
+            res.status = optimath::core::Status::Invalid("integer variable index out of range");
+            res.solve_time_seconds = timer.elapsed_seconds();
+            return res;
+        }
+    }
+
     bnb(mip.relaxation, mip.integer_vars, options, timer, stats, best, state);
 
     MIPResult out;

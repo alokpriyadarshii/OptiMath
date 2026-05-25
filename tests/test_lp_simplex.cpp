@@ -87,4 +87,11 @@ void test_lp_simplex() {
 
     auto limited_res = optimath::lp::solve_branch_and_bound(limited_mip, limited_opt);
     EXPECT_TRUE(limited_res.status.code == optimath::core::StatusCode::kMaxIterations);
+
+    optimath::lp::MIPModel invalid_mip;
+    invalid_mip.relaxation = limited_lp;
+    invalid_mip.integer_vars = {1};
+
+    auto invalid_res = optimath::lp::solve_branch_and_bound(invalid_mip, opt);
+    EXPECT_TRUE(invalid_res.status.code == optimath::core::StatusCode::kInvalidArgument);
 }
