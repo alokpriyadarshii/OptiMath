@@ -77,4 +77,8 @@ void test_nlp_bfgs() {
     timed_opt.limits.time_limit_seconds = 1e-300;
     auto timed_res = optimath::nlp::minimize_bfgs(f, Vector({-1.2, 1.0}), timed_opt);
     EXPECT_TRUE(timed_res.status.code == optimath::core::StatusCode::kMaxIterations);
+
+    auto already_optimal = optimath::nlp::minimize_bfgs(f, Vector({1.0, 1.0}), timed_opt);
+    EXPECT_TRUE(already_optimal.status.ok());
+    EXPECT_NEAR(already_optimal.solution.solution.objective_value, 0.0, 1e-12);
 }
