@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "optimath/lp/linear_program.hpp"
+#include "optimath/lp/mip_branch_and_bound.hpp"
 #include "optimath/lp/simplex.hpp"
 
 using optimath::lp::ConstraintSense;
@@ -42,4 +43,31 @@ void test_lp_simplex() {
     EXPECT_TRUE(res2.status.ok());
     EXPECT_NEAR(res2.solution.solution.x[0], 2.0, 1e-7);
     EXPECT_NEAR(res2.solution.solution.objective_value, 2.0, 1e-7);
+
+    // 0/1 knapsack must enforce both integrality and binary upper bounds.
+    // Without x_i <= 1 bounds, integer branching can choose multiple copies
+    // of the same item and return an invalid "0/1" solution.
+    const std::vector<double> value = {6.0, 10.0, 12.0, 7.0};
+    const std::vector<double> weight = {2.0, 4.0, 6.0, 3.0};
+    optimath::lp::LinearProgram knapsack(value.size());
+    knapsack.set_objective(value);
+    knapsack.add_constraint(weight, 9.0, ConstraintSense::kLessEqual, "capacity");
+    for (std::size_t i = 0; i < value.size(); ++i) {
+        std::vector<double> upper_bound(value.size(), 0.0);
+        upper_bound[i] = 1.0;
+        knapsack.add_constraint(upper_bound, 1.0, ConstraintSense::kLessEqual, "binary_ub");
+    }
+
+    optimath::lp::MIPModel mip;
+    mip.relaxation = knapsack;
+    mip.integer_vars = {0, 1, 2, 3};
+
+    auto mip_res = optimath::lp::solve_branch_and_bound(mip, opt);
+    EXPECT_TRUE(mip_res.status.ok());
+    EXPECT_TRUE(mip_res.solution.has_feasible_solution);
+    EXPECT_NEAR(mip_res.solution.solution.objective_value, 23.0, 1e-7);
+    EXPECT_NEAR(mip_res.solution.solution.x[0], 1.0, 1e-7);
+    EXPECT_NEAR(mip_res.solution.solution.x[1], 1.0, 1e-7);
+    EXPECT_NEAR(mip_res.solution.solution.x[2], 0.0, 1e-7);
+    EXPECT_NEAR(mip_res.solution.solution.x[3], 1.0, 1e-7);
 }

@@ -179,6 +179,11 @@ void demo_mip_knapsack(const SolverOptions& opt) {
     optimath::lp::LinearProgram lp(n);
     lp.set_objective(value);
     lp.add_constraint(weight, capacity, ConstraintSense::kLessEqual, "capacity");
+    for (std::size_t i = 0; i < n; ++i) {
+        std::vector<double> upper_bound(n, 0.0);
+        upper_bound[i] = 1.0;
+        lp.add_constraint(upper_bound, 1.0, ConstraintSense::kLessEqual, "binary_ub_" + std::to_string(i));
+    }
 
     optimath::lp::MIPModel mip;
     mip.relaxation = lp;
