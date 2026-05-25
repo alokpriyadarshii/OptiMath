@@ -59,6 +59,19 @@ core::SolveResult<BFGSResult> minimize_bfgs(
     for (std::size_t it = 0; it < max_it; ++it) {
         stats.iterations = it;
 
+        if (options.limits.time_limit_seconds > 0.0 && timer.elapsed_seconds() >= options.limits.time_limit_seconds) {
+            BFGSResult out;
+            out.solution = {x, fx};
+            out.stats = stats;
+
+            core::SolveResult<BFGSResult> res;
+            res.status = core::Status::MaxIterations("BFGS: time limit exceeded");
+            res.solution = out;
+            res.solve_time_seconds = timer.elapsed_seconds();
+            res.iterations = it;
+            return res;
+        }
+
         if (gx.norm2() <= grad_tol) {
             BFGSResult out;
             out.solution = {x, fx};
@@ -184,4 +197,3 @@ core::SolveResult<BFGSResult> minimize_bfgs(
 }
 
 } // namespace optimath::nlp
-

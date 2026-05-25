@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "optimath/core/status.hpp"
 #include "optimath/lp/linear_program.hpp"
 #include "optimath/lp/mip_branch_and_bound.hpp"
 #include "optimath/lp/simplex.hpp"
@@ -70,4 +71,20 @@ void test_lp_simplex() {
     EXPECT_NEAR(mip_res.solution.solution.x[1], 1.0, 1e-7);
     EXPECT_NEAR(mip_res.solution.solution.x[2], 0.0, 1e-7);
     EXPECT_NEAR(mip_res.solution.solution.x[3], 1.0, 1e-7);
+
+    // If branch-and-bound stops because of a node limit, it should report
+    // a limit status rather than incorrectly claiming infeasibility.
+    optimath::lp::LinearProgram limited_lp(1);
+    limited_lp.set_objective({1.0});
+    limited_lp.add_constraint({2.0}, 1.0, ConstraintSense::kLessEqual, "fractional_bound");
+
+    optimath::lp::MIPModel limited_mip;
+    limited_mip.relaxation = limited_lp;
+    limited_mip.integer_vars = {0};
+
+    optimath::core::SolverOptions limited_opt = opt;
+    limited_opt.limits.max_nodes = 1;
+
+    auto limited_res = optimath::lp::solve_branch_and_bound(limited_mip, limited_opt);
+    EXPECT_TRUE(limited_res.status.code == optimath::core::StatusCode::kMaxIterations);
 }

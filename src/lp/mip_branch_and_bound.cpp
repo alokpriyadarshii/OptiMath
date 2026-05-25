@@ -16,6 +16,10 @@ struct Best {
     LPSolution sol{};
 };
 
+struct SearchState {
+    bool stopped_on_limit{false};
+    std::optional<optimath::core::Status> terminal_status{};
+};
 
 std::optional<std::size_t> find_fractional_var(const std::vector<double>& x,
                                                const std::vector<std::size_t>& integer_vars,
@@ -43,15 +47,27 @@ void bnb(LinearProgram lp,
          const optimath::core::SolverOptions& options,
          optimath::core::WallTimer& timer,
          MIPStats& stats,
-         Best& best) {
-    if (options.limits.time_limit_seconds > 0.0 && timer.elapsed_seconds() >= options.limits.time_limit_seconds) return;
-    if (stats.nodes_explored >= options.limits.max_nodes) return;
+         Best& best,
+         SearchState& state) {
+    if (options.limits.time_limit_seconds > 0.0 && timer.elapsed_seconds() >= options.limits.time_limit_seconds) {
+        state.stopped_on_limit = true;
+        return;
+    }
+    if (stats.nodes_explored >= options.limits.max_nodes) {
+        state.stopped_on_limit = true;
+        return;
+    }
 
     ++stats.nodes_explored;
 
     auto lp_res = solve_simplex(lp, options);
     ++stats.lp_solves;
-    if (!lp_res.status.ok()) return;
+    if (!lp_res.status.ok()) {
+        if (lp_res.status.code != optimath::core::StatusCode::kInfeasible) {
+            state.terminal_status = lp_res.status;
+        }
+        return;
+    }
 
     const auto& sol = lp_res.solution.solution;
 
@@ -78,7 +94,7 @@ void bnb(LinearProgram lp,
         std::vector<double> a(left.num_vars(), 0.0);
         a[j] = 1.0;
         left.add_constraint(a, lo, ConstraintSense::kLessEqual, "bnb_ub");
-        bnb(std::move(left), integer_vars, options, timer, stats, best);
+        bnb(std::move(left), integer_vars, options, timer, stats, best, state);
     }
 
     // Right: x_j >= hi
@@ -87,7 +103,7 @@ void bnb(LinearProgram lp,
         std::vector<double> a(right.num_vars(), 0.0);
         a[j] = 1.0;
         right.add_constraint(a, hi, ConstraintSense::kGreaterEqual, "bnb_lb");
-        bnb(std::move(right), integer_vars, options, timer, stats, best);
+        bnb(std::move(right), integer_vars, options, timer, stats, best, state);
     }
 }
 
@@ -98,8 +114,9 @@ optimath::core::SolveResult<MIPResult> solve_branch_and_bound(const MIPModel& mi
 
     MIPStats stats;
     Best best;
+    SearchState state;
 
-    bnb(mip.relaxation, mip.integer_vars, options, timer, stats, best);
+    bnb(mip.relaxation, mip.integer_vars, options, timer, stats, best, state);
 
     MIPResult out;
     out.stats = stats;
@@ -111,7 +128,11 @@ optimath::core::SolveResult<MIPResult> solve_branch_and_bound(const MIPModel& mi
     res.iterations = stats.nodes_explored;
     res.solution = out;
 
-    if (!best.has) {
+    if (state.stopped_on_limit) {
+        res.status = optimath::core::Status::MaxIterations("Branch-and-bound stopped before proving optimality");
+    } else if (!best.has && state.terminal_status.has_value()) {
+        res.status = *state.terminal_status;
+    } else if (!best.has) {
         res.status = optimath::core::Status::Infeasible("No integer-feasible solution found within limits");
     } else {
         res.status = optimath::core::Status::Ok();

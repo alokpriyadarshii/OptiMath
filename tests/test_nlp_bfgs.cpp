@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "optimath/core/options.hpp"
+#include "optimath/core/status.hpp"
 #include "optimath/linalg/vector.hpp"
 #include "optimath/nlp/bfgs.hpp"
 #include "optimath/nlp/objective.hpp"
@@ -71,4 +72,9 @@ void test_nlp_bfgs() {
     EXPECT_TRUE(res2.status.ok());
     EXPECT_NEAR(res2.solution.solution.x.raw()[0], 1.0, 1e-3);
     EXPECT_NEAR(res2.solution.solution.x.raw()[1], 2.0, 1e-3);
+
+    optimath::core::SolverOptions timed_opt;
+    timed_opt.limits.time_limit_seconds = 1e-300;
+    auto timed_res = optimath::nlp::minimize_bfgs(f, Vector({-1.2, 1.0}), timed_opt);
+    EXPECT_TRUE(timed_res.status.code == optimath::core::StatusCode::kMaxIterations);
 }
