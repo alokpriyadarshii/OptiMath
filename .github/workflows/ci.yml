@@ -21,3 +21,6 @@ jobs:
 
       - name: Test
         run: ctest --test-dir build --output-on-failure
+
+      - name: Test web playground
+        run: node tests/public_app_test.mjs

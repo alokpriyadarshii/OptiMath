@@ -117,6 +117,47 @@ function isFeasible(x, constraints) {
   });
 }
 
+function hasFeasiblePoint(constraints, dimension) {
+  const activeEquations = constraints.map((constraint) => ({
+    coeffs: constraint.coeffs,
+    rhs: constraint.rhs,
+  }));
+
+  for (let i = 0; i < dimension; i += 1) {
+    activeEquations.push({
+      coeffs: Array.from({ length: dimension }, (_, index) => (index === i ? 1 : 0)),
+      rhs: 0,
+    });
+  }
+
+  for (const combo of combinations(activeEquations.length, dimension)) {
+    const A = combo.map((index) => activeEquations[index].coeffs);
+    const b = combo.map((index) => activeEquations[index].rhs);
+    const x = solveLinearSystem(A, b);
+    if (x && isFeasible(x, constraints)) return true;
+  }
+
+  return false;
+}
+
+function hasUnboundedDirection(objective, mode, constraints) {
+  const directionConstraints = constraints.map((constraint) => ({
+    coeffs: constraint.coeffs,
+    sense: constraint.sense,
+    rhs: 0,
+    label: constraint.label,
+  }));
+
+  directionConstraints.push({
+    coeffs: objective,
+    sense: '=',
+    rhs: mode === 'max' ? 1 : -1,
+    label: 'objective improvement direction',
+  });
+
+  return hasFeasiblePoint(directionConstraints, objective.length);
+}
+
 function solveLp() {
   const mode = $('#lpMode').value;
   const objective = parseNumbers($('#lpObjective').value, 'Objective coefficients');
@@ -134,6 +175,10 @@ function solveLp() {
   if (objective.length > 8) throw new Error('The browser LP solver supports up to 8 variables for safety.');
 
   const constraints = constraintLines.map((line) => parseConstraint(line, objective.length));
+  if (hasUnboundedDirection(objective, mode, constraints)) {
+    throw new Error('The LP is unbounded in the selected objective direction.');
+  }
+
   const activeEquations = constraints.map((constraint, index) => ({
     coeffs: constraint.coeffs,
     rhs: constraint.rhs,
