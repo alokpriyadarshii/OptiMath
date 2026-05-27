@@ -32,7 +32,6 @@ This project is a good fit for educational use, prototyping, and understanding s
 - Example optimization demos exposed through `optimath_cli`
 - Test suite for LP and NLP components
 
-
 ## Web Frontend
 
 OptiMath now includes a static browser playground in `public/` for deployment on Vercel or any static host. It lets users enter inputs and view outputs for:
@@ -54,6 +53,23 @@ http://localhost:8080
 ```
 
 For Vercel, this repo uses `vercel.json` to publish the `public` folder with no build command.
+
+## Tech Stack
+
+| Category | Technology |
+| --- | --- |
+| Programming Language | C++20 |
+| Build System | CMake 3.20+ |
+| Core Library | Custom C++ optimization library |
+| Linear Algebra | Custom Matrix and Vector modules |
+| Optimization Algorithms | Simplex, Branch and Bound, BFGS, Penalty Method |
+| CLI Application | C++ command-line app |
+| Web Frontend | HTML, CSS, JavaScript |
+| Testing | CTest, custom C++ tests, Node.js web test |
+| CI/CD | GitHub Actions |
+| Deployment | Vercel static hosting |
+| Documentation | Markdown |
+| Version Control | Git / GitHub |
 
 ## Project Structure
 
