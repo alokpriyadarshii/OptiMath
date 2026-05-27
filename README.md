@@ -164,13 +164,13 @@ The current test suite covers:
 
 When apps are enabled, the build produces `optimath_cli`.
 
-### Show Help
+### Show help
 
 ```bash
 ./build/optimath_cli --help
 ```
 
-### List Available Demos
+### List available demos
 
 ```bash
 ./build/optimath_cli --list
@@ -185,7 +185,7 @@ Current demos:
 - `nlp:curvefit`
 - `nlp:portfolio`
 
-### Run Examples
+### Run examples
 
 ```bash
 ./build/optimath_cli lp:diet
@@ -196,7 +196,7 @@ Current demos:
 ./build/optimath_cli nlp:portfolio
 ```
 
-### Example Output
+### Example output
 
 `lp:diet`
 
@@ -236,7 +236,7 @@ Available options:
 
 ## Library Overview
 
-### Linear Programming
+### Linear programming
 
 The LP module models problems in the form:
 
@@ -266,7 +266,7 @@ lp.add_constraint({0.0, 1.0}, 3.0, ConstraintSense::kLessEqual);
 auto res = optimath::lp::solve_simplex(lp);
 ```
 
-### Integer Optimization
+### Integer optimization
 
 The integer optimization layer performs branch-and-bound on top of LP relaxations.
 
@@ -280,7 +280,7 @@ You provide:
 - an LP relaxation
 - a list of variable indices that must take integer values
 
-### Nonlinear Optimization
+### Nonlinear optimization
 
 The NLP module supports unconstrained minimization with BFGS.
 
