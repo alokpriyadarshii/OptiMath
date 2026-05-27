@@ -33,7 +33,7 @@ This project is a good fit for educational use, prototyping, and understanding s
 - Test suite for LP and NLP components
 
 
-## Web frontend
+## Web Frontend
 
 OptiMath now includes a static browser playground in `public/` for deployment on Vercel or any static host. It lets users enter inputs and view outputs for:
 
@@ -55,33 +55,72 @@ http://localhost:8080
 
 For Vercel, this repo uses `vercel.json` to publish the `public` folder with no build command.
 
-## Project structure
+## Project Structure
 
 ```text
 OptiMath/
+├── README.md
+├── LICENSE
+├── CMakeLists.txt
+├── vercel.json
+├── .gitignore
+├── .mailmap
+├── .github/
+│   └── workflows/
+│       └── ci.yml
 ├── apps/
 │   └── optimath_cli.cpp
 ├── docs/
 │   └── ALGORITHMS.md
+├── images/
+│   ├── optimath-preview-1.png
+│   ├── optimath-preview-2.png
+│   └── optimath-preview-3.png
 ├── public/
-│   ├── app.js
 │   ├── index.html
-│   └── styles.css
-├── include/optimath/
-│   ├── core/
-│   ├── linalg/
-│   ├── lp/
-│   └── nlp/
+│   ├── styles.css
+│   └── app.js
+├── include/
+│   └── optimath/
+│       ├── core/
+│       │   ├── options.hpp
+│       │   ├── result.hpp
+│       │   ├── status.hpp
+│       │   └── timer.hpp
+│       ├── linalg/
+│       │   ├── matrix.hpp
+│       │   ├── solve.hpp
+│       │   └── vector.hpp
+│       ├── lp/
+│       │   ├── linear_program.hpp
+│       │   ├── mip_branch_and_bound.hpp
+│       │   └── simplex.hpp
+│       └── nlp/
+│           ├── bfgs.hpp
+│           ├── objective.hpp
+│           └── penalty.hpp
 ├── src/
 │   ├── core/
+│   │   ├── status.cpp
+│   │   └── timer.cpp
 │   ├── linalg/
+│   │   ├── matrix.cpp
+│   │   ├── solve.cpp
+│   │   └── vector.cpp
 │   ├── lp/
+│   │   ├── linear_program.cpp
+│   │   ├── mip_branch_and_bound.cpp
+│   │   └── simplex.cpp
 │   └── nlp/
-├── tests/
-│   ├── test_lp_simplex.cpp
-│   ├── test_nlp_bfgs.cpp
-│   └── test_main.cpp
-└── CMakeLists.txt
+│       ├── bfgs.cpp
+│       ├── objective.cpp
+│       └── penalty.cpp
+└── tests/
+    ├── test_main.cpp
+    ├── test_common.hpp
+    ├── test_lp_simplex.cpp
+    ├── test_nlp_bfgs.cpp
+    └── public_app_test.mjs
 ```
 
 ## Requirements
@@ -108,7 +147,7 @@ cmake -S . -B build -DOPTIMATH_BUILD_APPS=ON -DOPTIMATH_BUILD_TESTS=ON
 cmake --build build --config Release
 ```
 
-## Run tests
+## Run Tests
 
 ```bash
 ctest --test-dir build --output-on-failure
@@ -121,17 +160,17 @@ The current test suite covers:
 - BFGS convergence on Rosenbrock minimization
 - Penalty-based constrained optimization behavior
 
-## CLI demos
+## CLI Demos
 
 When apps are enabled, the build produces `optimath_cli`.
 
-### Show help
+### Show Help
 
 ```bash
 ./build/optimath_cli --help
 ```
 
-### List available demos
+### List Available Demos
 
 ```bash
 ./build/optimath_cli --list
@@ -146,7 +185,7 @@ Current demos:
 - `nlp:curvefit`
 - `nlp:portfolio`
 
-### Run examples
+### Run Examples
 
 ```bash
 ./build/optimath_cli lp:diet
@@ -157,7 +196,7 @@ Current demos:
 ./build/optimath_cli nlp:portfolio
 ```
 
-### Example output
+### Example Output
 
 `lp:diet`
 
@@ -179,7 +218,7 @@ x: [0.999999999215, 0.999999998428]
 Iterations: 2283
 ```
 
-## Solver options
+## Solver Options
 
 The CLI exposes a few runtime controls that map to `optimath::core::SolverOptions`:
 
@@ -195,9 +234,9 @@ Available options:
 - `--primal-tol X` primal feasibility tolerance
 - `--dual-tol X` dual feasibility tolerance
 
-## Library overview
+## Library Overview
 
-### Linear programming
+### Linear Programming
 
 The LP module models problems in the form:
 
@@ -227,7 +266,7 @@ lp.add_constraint({0.0, 1.0}, 3.0, ConstraintSense::kLessEqual);
 auto res = optimath::lp::solve_simplex(lp);
 ```
 
-### Integer optimization
+### Integer Optimization
 
 The integer optimization layer performs branch-and-bound on top of LP relaxations.
 
@@ -241,7 +280,7 @@ You provide:
 - an LP relaxation
 - a list of variable indices that must take integer values
 
-### Nonlinear optimization
+### Nonlinear Optimization
 
 The NLP module supports unconstrained minimization with BFGS.
 
@@ -292,7 +331,7 @@ This project is intentionally lightweight and educational. At the moment:
 - There is no file-based model format or parser yet
 - Performance is designed for clarity over industrial-scale optimization workloads
 
-## Roadmap ideas
+## Roadmap Ideas
 
 Good next improvements for the project would be:
 
